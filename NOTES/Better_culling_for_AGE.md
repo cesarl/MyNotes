@@ -46,6 +46,7 @@ Une fois tout les draw calls de prepares (pour chaques camera et les lights) on 
 On peut meme imaginer les soumettre des que possible (tout en conservant l'ordre requis par la pipeline)
 
 De plus, le "schema" ci dessus n'illustre qu'une seule frame. En double bufferisant, on pourrait avoir la preparatio du rendu de la frame t+1 alors que celle de la t+0 n'est pas terminee.
+... je dis des conneries, on ne peux pas modifier l'octree alors qu'on est en train de lire dessus dans un autre thread. Pour ca il faudrait soit le dupliquer (beurk) soit on update l'octree, et on cull tout ce dont on a besoin avant...
 
 Le seul probleme, concernant l'archi existante est le passage des commandes depuis le `main thread` vers le `render thread`, car jusqu'ici le `prepare render thread` faisait office de proxy.
 
