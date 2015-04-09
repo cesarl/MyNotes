@@ -19,9 +19,9 @@ http://www.nickdarnell.com/hierarchical-z-buffer-occlusion-culling/
 
 Elles peuvent se completer ou non les unes les autres.
 
-### Utiliser la depth des la derniere passe de rendu
+### Utiliser la depth de la derniere passe de rendu
 
-C'est un peu post moderne comme technique. Et il y a plein d'inconnue non resolues (dans ma tete).
+C'est un peu post moderne comme technique. Et il y a plein d'inconnues non resolues (dans ma tete).
 
 Avant le draw de la frame 1 :
 - tu prends la depth de la frame 0
