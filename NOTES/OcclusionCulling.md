@@ -105,6 +105,8 @@ Voila le resultat du benchmark :
 | Method                          | FPS     |
 |---------------------------------|---------|
 | 2 Pass + Z mipmap + Dicard All  | 148 Fps |
+| 1 Pass + Z mipmap + Dicard All  | 149 Fps |
+| 1 Pass + Z mipmap + Discard Non | 79 Fps  |
 | 2 Pass + Z mipmap + Discard Non | 85 Fps  |
 | 2 Pass + Discard All            | 158 Fps |
 | 2 Pass + Discard Non            | 87 Fps  |
@@ -113,3 +115,4 @@ Voila le resultat du benchmark :
 Conclusion : le faite de diviser le rendu en 2 pass ralenti considerablement le rendu.
 L'impact du mipmaping de la depth est negligeable.
 
+En gros on dirait que c'est l'utilisation du geometry shader qui plombe les perfs. Meme lorsqu'il discard tout les draw calls. C'est tres tres etrange.
