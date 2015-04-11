@@ -84,4 +84,30 @@ Puis, a determiner, comme evoqué plus haut : soit on draw les mesh en les accom
 Le probleme d'utiliser un compute, c'est qu'il faut trouver quelque chose a faire faire au Render thread pendant que le compute fait son affaire. Sinon on va perdre du temps CPU pour rien... J'aurais du coup plutot tendance a pencher pour la solution on balance le draw call avec une uniform pour sa AABB on fait le test dans le VS et on le discard dans le GS si il est occlude.
 
 
+--------------------
+
+## Retour sur experience
+
+J'ai fait une premiere implementation de test :
+- Un mur et un sol sont definis en tant qu'occludeur
+- Derriere le mur 100 meshs assez complexes sont disposes
+
+Lorsque l'occlusion est activee :
+- On draw le mur et le sol
+- On mipmap la depth (pour le moment ca sert a rien)
+- On draw les mesh complexes
+    + Vertex shader basic
+    + Geometrie shader (qui discard ou non le fragment shader - condition en dure dans le shader pour tester)
+    + Fragment shader classique
+
+Voila le resultat du benchmark :
+
+| 2 Pass + Z mipmap + Dicard All  | 148 Fps |
+| 2 Pass + Z mipmap + Discard Non | 85 Fps  |
+| 2 Pass + Discard All            | 158 Fps |
+| 2 Pass + Discard Non            | 87 Fps  |
+| 1 classical Pass                | 240 Fps |
+
+Conclusion : le faite de diviser le rendu en 2 pass ralenti considerablement le rendu.
+L'impact du mipmaping de la depth est negligeable.
 
