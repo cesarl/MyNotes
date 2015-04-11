@@ -102,6 +102,8 @@ Lorsque l'occlusion est activee :
 
 Voila le resultat du benchmark :
 
+| Method                          | FPS     |
+|---------------------------------|---------|
 | 2 Pass + Z mipmap + Dicard All  | 148 Fps |
 | 2 Pass + Z mipmap + Discard Non | 85 Fps  |
 | 2 Pass + Discard All            | 158 Fps |
