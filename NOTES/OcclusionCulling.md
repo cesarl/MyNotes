@@ -92,6 +92,10 @@ J'ai fait une premiere implementation de test :
 - Un mur et un sol sont definis en tant qu'occludeur
 - Derriere le mur 100 meshs assez complexes sont disposes
 
+### Experience 1
+
+__Echec__ haha !
+
 Lorsque l'occlusion est activee :
 - On draw le mur et le sol
 - On mipmap la depth (pour le moment ca sert a rien)
@@ -115,4 +119,32 @@ Voila le resultat du benchmark :
 Conclusion : le faite de diviser le rendu en 2 pass ralenti considerablement le rendu.
 L'impact du mipmaping de la depth est negligeable.
 
-En gros on dirait que c'est l'utilisation du geometry shader qui plombe les perfs. Meme lorsqu'il discard tout les draw calls. C'est tres tres etrange.
+En gros on dirait que c'est l'utilisation du geometry shader qui plombe les perfs. Meme lorsqu'il discard tout les draw calls.
+En effet on passe par le GS pour chaque triangle de chaque mesh complexe. De plus on fait tout de meme un draw call.
+
+### Experience 2
+
+__Succes mitigé__ hoho !
+
+Toujours avec la meme scene et les mesh complexes derriere un mur.
+
+- On draw le mur et le sol
+- On mipmap la depth
+- On get la depth map (au mipmap 3) sur la RAM
+- Pour chaque mesh complexe, on test un point (transformé sur sa MVP) dans le z buffer copie.
+- Si la depth du point est < a celle de la depth map on fait un draw call pour cet objet.
+
+Bien sur c'est loin d'etre optimisé, pour plusieurs raisons :
+- Deja la pipeline n'offre pas d'acces simplifié a la matrice de transformation du mesh dans le render thread. Du coup j'ai du tricxer temporairement pour y acceder (ca ne prend que tres peu de temps, mais ca en prend quand meme plus que rien hehe)
+- Je copie la depth map sur la RAM avec un `glGetTexImage`. Je pourrais surement utiliser un pixel buffer object pour gagner du temps.
+- Je ne test qu'un seul point. Donc c'est forcement inexacte. Il faudrait que je test les 8 points de la AABB.
+- Je n'ai qu'un seul niveau de mipmap, il m'en faudrait plusieurs pour tester la depth sur differentes depth map en fonction de la taille de la AABB.
+- Tout ca est fait sur le render thread. Ce qui ne devrait pas etre le cas. Il faudrait deporter ca sur le prepare render thread, qui est designé a cet effet, et qui dispose de beaucoup plus de temps que le render thread.
+
+Voila les resultats en comparaison avec une version qui n'occlude rien :
+
+| Method                          | FPS     |
+|---------------------------------|---------|
+| Occlusion On + 0 objects a visible | 290 Fps |
+| Occlusion On + all objects are visible  | 70 Fps |
+| 1 classical Pass                | 240 Fps |
