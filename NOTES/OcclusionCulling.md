@@ -154,12 +154,25 @@ C'est a benchmarquer. Quoi qu'il en soit, rien de tout ca ne devrait etre fait d
 
 ### Experience 3
 
-A expliquer :)
+On a 2 `DepthMap` objects qu'on swap a chaque frame entre le `render1 thread et le `prepare render` thread.
 
-| Method                          | FPS     |
-|---------------------------------|---------|
-| Occlusion On + 0 objects a visible | 390 Fps |
-| Occlusion On + all objects are visible  | 70 Fps |
-| 1 classical Pass                | 240 Fps |
+Cet objet contient :
+- Un buffer de pixel correspondant a la depth map
+- La matrice VP utilisee pour cette depth map
+
+A chaque rendu, le render thread rend les objets Occludant. Get la depth depuis le GPU vers le buffer de l'objet `DepthMap`. Puis rend les objet occludables.
+
+En paralelle. Le `Prepare render` thread test les bounding box de tout les objets occludables dans la `Depth Map` de la frame precedente.
+
+Du coup le resultat est quand meme biaisé car le test est fait sur la depth precedente.
+
+Il va falloir que je rescale les AABB pour les elargir en fonction de la VP de la depth map.
+
+De plus les infos de depth sont comme differentes de celles que je calcule pour les boites (de 0.001) ce qui change tout. Pour le moment j'ai hacké les valeurs pour tester :)
+
+| Method                          | FPS     | Ms |
+|---------------------------------|---------|----|
+| Occlusion On + 0 objects a visible | 390 Fps | 2.0 |
+| 1 classical Pass                | 240 Fps | 4.0 |
 
 WTF !
