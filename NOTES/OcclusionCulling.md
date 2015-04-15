@@ -145,9 +145,9 @@ Voila les resultats en comparaison avec une version qui n'occlude rien :
 
 | Method                          | FPS     | Ms |
 |---------------------------------|---------|----|
-| Occlusion On + 0 objects a visible | 290 Fps | 3.0 |
-| Occlusion On + all objects are visible  | 70 Fps | 14.0 |
-| 1 classical Pass                | 240 Fps | 4.0 |
+| Occlusion On + 0 objects a visible | 290 Fps | 3.44 |
+| Occlusion On + all objects are visible  | 70 Fps | 14.28 |
+| 1 classical Pass                | 240 Fps | 4.16 |
 
 Mine de rien, on gagne 1 milliseconde lorsque tout les objets sont occludes, ca n'est pas rien. Cependant lorsqu'ils sont touts visibles, les performances sont catastrophiques. Sont elles perdues par l'appelle `UniqueDraw` moins optimise que le `DrawAll` qui draw tout sans distinction ... ?
 C'est a benchmarquer. Quoi qu'il en soit, rien de tout ca ne devrait etre fait dans le `Render Thread`, c'est un heresie ! Personne ne respecte mon "archi" threadée hehe !
@@ -172,7 +172,7 @@ De plus les infos de depth sont comme differentes de celles que je calcule pour 
 
 | Method                          | FPS     | Ms |
 |---------------------------------|---------|----|
-| Occlusion On + 0 objects a visible | 390 Fps | 2.0 |
-| 1 classical Pass                | 240 Fps | 4.0 |
+| Occlusion On + 0 objects a visible | 390 Fps | 2.56 |
+| 1 classical Pass                | 240 Fps | 4.16 |
 
 WTF !
