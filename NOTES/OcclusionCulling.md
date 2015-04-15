@@ -158,7 +158,7 @@ A expliquer :)
 
 | Method                          | FPS     |
 |---------------------------------|---------|
-| Occlusion On + 0 objects a visible | 290 Fps |
+| Occlusion On + 0 objects a visible | 390 Fps |
 | Occlusion On + all objects are visible  | 70 Fps |
 | 1 classical Pass                | 240 Fps |
 
