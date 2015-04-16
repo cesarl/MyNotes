@@ -170,10 +170,12 @@ Il va falloir que je rescale les AABB pour les elargir en fonction de la VP de l
 
 De plus les infos de depth sont comme differentes de celles que je calcule pour les boites (de 0.001) ce qui change tout. Pour le moment j'ai hacké les valeurs pour tester :)
 
+
 | Method                          | FPS     | Ms |
 |---------------------------------|---------|----|
 | Occlusion On + 0 objects a visible | 390 Fps | 2.56 |
-| 1 classical Pass                | 240 Fps | 4.16 |
+| Occlusion On + 0 objects a visible | 160 Fps | 2.56 |
+| 1 classical Pass                | 200~240 Fps | 4.16 |
 
 Todo list for experiment 3 :
 - Ne pas tester les 8 points de la AABB. Mais definir un rectangle sur le z le plus proche et tester chaque pixel de la depth map
