@@ -175,4 +175,10 @@ De plus les infos de depth sont comme differentes de celles que je calcule pour 
 | Occlusion On + 0 objects a visible | 390 Fps | 2.56 |
 | 1 classical Pass                | 240 Fps | 4.16 |
 
-WTF !
+Todo list for experiment 3 :
+- Ne pas tester les 8 points de la AABB. Mais definir un rectangle sur le z le plus proche et tester chaque pixel de la depth map
+- Debuguer la difference de 0.005 f entre le z du pixel et le z de l'objet
+- Diviser le travail sur plusieurs threads
+- Trouver selon quel ratio aggrandir les AABB
+
+
