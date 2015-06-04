@@ -52,4 +52,38 @@ Le seul probleme, concernant l'archi existante est le passage des commandes depu
 
 J'en parlerais plus tard ! ^^
 
+----------------------------------------------
 
+----------------------------------------------
+
+# Description de la nouvelle archi
+
+Une entité a une collection de components (Dynamique mesh, static mesh, life, weapon holder, sound emitter, etc etc). L'entité est orientée gameplay et game design.
+
+Une entité a un link.
+Le link fait le lien entre l'entité (le game object coté gameplay), et sa representation graphique.
+
+On va stocker plein d'informations necessaires au gameplay et impactant le rendu.
+
+Ce link herite de BFCLink. BFCLink est une data structure beaucoup plus legere que le Link. Elle contient :
+- Une liste des ressources drawable attachées a l'entité via leurs components (static mesh, dynamique mesh, skinned mesh, point light, spotlight, billboard, whatever, etc) et puis c'est tout.
+- Quelques trucs qui ne vous interessent pas qui permettent d'updater le culling que pour celles qui ont bougees (3 pointeurs)
+
+Les drawable qu'elle liste sont représentés pars des BFCCullableHandle.
+Ces handle contiennent un pointeur sur le cullable (ou drawable, je ne suis  pas encore sur du nom haha), et un pointeur (c'est pas un pointeur en vrai mais pareil) sur sa representation dans le system de culling.
+
+Parlons du system de culling, il est relativement simple :
+Les elements a culler sont stocker dans des BFCItem.
+Un BFCItem contient :
+- un pointeur sur le drawable 64b
+- un void* pour peut etre un truc plus tard 64b
+- un vec 4 : position + radius de la BBSphere 128b
+
+Ce sont ces item que l'on va tester contre le frustum.
+Ces items sont rangés contigue dans des BFCBlock.
+Un block aujourdhui contient 64 Items (peut etre plus un jour).
+Un BFCBlockManager gere la creation et la destruction des Item
+
+Donc : Un BFCBlockManager == l'equivalent d'un octree.
+
+Cependant, je veux specialiser les "Octree", de maniere a ce qu'ils ne contiennent qu'un seul et meme type de drawable (pour arreter de faire du switch case degueulasse)
