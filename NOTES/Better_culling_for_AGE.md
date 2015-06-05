@@ -56,21 +56,21 @@ J'en parlerais plus tard ! ^^
 
 ----------------------------------------------
 
-# Description de la nouvelle archi
+# 1 mois plus tard : BFC
 
 Une entité a une collection de components (Dynamique mesh, static mesh, life, weapon holder, sound emitter, etc etc). L'entité est orientée gameplay et game design.
 
 Une entité a un link.
 Le link fait le lien entre l'entité (le game object coté gameplay), et sa representation graphique.
 
-On va stocker plein d'informations necessaires au gameplay et impactant le rendu.
+Dans le `Link`, on va stocker plein d'informations necessaires au gameplay et impactant le rendu.
 
-Ce link herite de BFCLink. BFCLink est une data structure beaucoup plus legere que le Link. Elle contient :
-- Une liste des ressources drawable attachées a l'entité via leurs components (static mesh, dynamique mesh, skinned mesh, point light, spotlight, billboard, whatever, etc) et puis c'est tout.
+Ce link herite de `BFCLink`. `BFCLink` est une data structure beaucoup plus legere que le `Link`. Elle contient :
+- Une liste des ressources drawable attachées a l'entité via leurs components (static mesh, dynamique mesh, skinned mesh, point light, spotlight, billboard, whatever, etc).
 - Quelques trucs qui ne vous interessent pas qui permettent d'updater le culling que pour celles qui ont bougees (3 pointeurs)
 
-Les drawable qu'elle liste sont représentés pars des BFCCullableHandle.
-Ces handle contiennent un pointeur sur le cullable (ou drawable, je ne suis  pas encore sur du nom haha), et un pointeur (c'est pas un pointeur en vrai mais pareil) sur sa representation dans le system de culling.
+Les drawable listés par le link sont représentés par des `BFCCullableHandle`.
+Ces handles contiennent un pointeur sur le cullable (ou drawable, je ne suis pas encore sur du nom haha), et un pointeur (c'est pas un pointeur en vrai mais pareil) sur sa representation dans le system de culling.
 
 Parlons du system de culling, il est relativement simple :
 Les elements a culler sont stocker dans des BFCItem.
@@ -87,3 +87,68 @@ Un BFCBlockManager gere la creation et la destruction des Item
 Donc : Un BFCBlockManager == l'equivalent d'un octree.
 
 Cependant, je veux specialiser les "Octree", de maniere a ce qu'ils ne contiennent qu'un seul et meme type de drawable (pour arreter de faire du switch case degueulasse)
+D'autant plus qu'aujourd'hui nous n'avons que tres peu de type different (nous en avons 1 seul : meshDrawable)
+
+Les fameux drawable (ou cullable) heritent tous de `BFCCullableObject`.
+Ce dernier ne contient rien, si ce n'est :
+- une `virtual CullableTypeID getBFCType()` qui permet de distinguer dans quel BFCBlockManager le chercher, et plus simplement de quel type est le cullable. (Il retourne un enum quoi : StaticMesh, DynamicMesh, etc etc).
+- une mat4 de world transform pour le draw (pas sur encore que ca sera directement cette data structure qui servira au draw, ou une autre qu'elle contiendrait)
+
+#### Comment fonctionne le moteur
+
+Je decris ici une premiere etape, des choses seront amenees a etre changee plus tard (ex : virer le concept de main thread)
+
+On a le main thread qui va updater non petites scenes les unes apres les autres.
+
+Lorsque l'on bouge une entite elle enregistre son link aupres du `BFCLinkTracker`. Elle ne le fait qu'une seule fois par frame, meme si elle est bougee plusieurs fois dans la meme frame. Cela permettra a la fin de la frame de n'updater que les links ayant bougés.
+
+A la fin de la scene. Le BFCLinkTracker :
+-> itere sur les link
+   -> itere sur les drawable contenus par les links
+      -> mets a jour la bounding sphere des BFCKItem utilises pour le culling
+
+A ce moment la se pose une question !
+Nous pourrions ajouter une `virtual glm::vec4 ComputeTransform(const glm::mat4 &linkTransform)` a `BFCCullableBase`. Cette virtual prendrait en argument la world transformation du link et :
+- Calculera sa veritable World Transform pour le draw
+- Calculera sa veritable bounding sphere et la renvera pour la stocker dans l'item qui servira au culling.
+Faire ca permettrait de ne pas rescale les mesh (et surtout les meshs animés !). Ont aurait simplement une matrice de transformation pour inverser le scale.
+Par contre ca fait apperler une virtual en plus. Bref, a voir.
+
+Donc, nos BFCKItems ont ete mis a jour : leur bounding sphere a ete calculee.
+
+Notez que cette update peut etre faire de maniere parallelisee sans besoin de synchronisation.
+
+Nous passons ensuite au culling ! Pour cela c'est tres simple et tres modulable, c'est ca qui est interessant. Prenons un exemple debile :
+
+Nous avons 3 spotlights, une camera, 1000 objets drawable dans notre scene.
+Nous voulons faire une liste de drawable par spotlight, et par camera. Donc 4 listes de drawable.
+
+Nous avons 2 types de drawables : les mesh de type X et d'autre de type Y. Et disons que les spotlights ne veulent pas des de type Y.
+
+Voila ce qui va se passer. On va dire :
+- BlockManagerFactory remplis moi cette liste des drawable X et Y pour ce frustum de camera, puis, quand c'est fini, fait l'occlusion (callback quand tout les jobs ont termines).
+- BlockManagerFactory remplis moi cette liste des drawable X pour ce frustum de spotlight1.
+- BlockManagerFactory remplis moi cette liste des drawable X pour ce frustum de spotlight2.
+- BlockManagerFactory remplis moi cette liste des drawable X pour ce frustum de spotlight3.
+- Puis quand tout est termine, envoie ca au render thread (ou alors pourquoi pas envoie au fur et a mesure que les listes sont terminees)
+
+Ce que le blockmanagerfactory va faire c'est qu'il va lancer 1 job, par block. Ce job va tester les 64 items du block vs le frustum et si le test est bon, push dans la liste le pointeur sur le drawable.
+
+Les listes dans lesquelles on push sont bien evidemment tread safe (je pense que des listes lock free peuvent etre pas mal)
+
+On pourrait meme imaginer que l'update d'une scene est un job. Que quand une scene a fini d'etre updatee, on lance en meme temps la preparation du rendu, et la scene suivante en parallelle
+
+La vous allez me dire : "Oui mais avant avec le prepare render thread on pouvait faire une update physique pendant qu'on preparait le rendu ! C'est pas ca que tu nous avait vendu cesar ?"
+
+En effet je vous avais vendu qu'on double bufferisait, ce qui est le cas, mais quand on regarde ce qu'il se passe on voit bien que  la double bufferisation ne sert a rien des qu'un thraed rattrape l'autre il est obligé de l'attendre et hop on perd du temps. Donc au final ca revenait au meme : quand on passait 6ms dans le prepare, on etait obligé de passer 6ms (dont 5 d'attente) dans le main thread.
+On etait bloque car on ne pouvait pas se permettre de rater une frame entre les deux thread, sinon on pouvait perdre des infos telles que :
+- on a ajouté une entite
+- on a ajouté un mesh
+- on a bougé une entite
+etc etc
+
+La, avec ma nouvelle proposition, plus de probleme !
+On a tout dans le meme thread : creation / deletion d'entite et de component / ajout suppression de components graphique / mise a jour des positions. Ensuite on peut dispatcher le culling !
+On pourrait meme double bufferiser les BFCBlock tres simplement si jamais on voulait.
+
+Voili voilou !
