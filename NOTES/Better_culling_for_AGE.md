@@ -148,7 +148,8 @@ On etait bloque car on ne pouvait pas se permettre de rater une frame entre les 
 etc etc
 
 La, avec ma nouvelle proposition, plus de probleme !
-On a tout dans le meme thread : creation / deletion d'entite et de component / ajout suppression de components graphique / mise a jour des positions. Ensuite on peut dispatcher le culling !
-On pourrait meme double bufferiser les BFCBlock tres simplement si jamais on voulait.
+On a tout dans le meme thread : creation / deletion d'entite et de component / ajout suppression de components graphique / mise a jour des positions. Ensuite on peut dispatcher le culling ! Si besoin seulement ! Si on est a 60 FPS, on peut tout a fait sauter la phase d'update des links et du culling, et le faire plus tard ! On peut meme faire de double ou triple bufferisation du rendu, c'est dire que l'on rempli 2 buffers de trucs a rendre, et jamais plus ! Comme ca le render thread a toujours a manger, et on de cull et occlude que quand il y a moins de 2 buffer de rendu de pleins !
+
+On pourrait meme double bufferiser les BFCBlock tres simplement si jamais on voulait. Je les ai designé pour pouvoir le faire, mais ca n'est pas a mon sens la meilleure idee, car ca complexifie l'archi pour rien.
 
 Voili voilou !
