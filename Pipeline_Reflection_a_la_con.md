@@ -113,3 +113,81 @@ Ensuite :
 		-> Pour chaque material (on le bind)
 			-> Pour chaque mesh (on le draw)
 			...
+
+------------------------------------------------------------------------------
+
+### Les principes généraux :
+
+- Limiter au maximum les bindings (shaders, uniforms, etc)
+    + Logiquement BGFX nous aide pour ca, mais plus on rationnalise nos appels mieux c'est.
+- Automatiser la relation : mesh, material, pipeline. Un juste milieu entre flexibilité (nouveau effets facilement implementable - avec conservation des performances) et automatisation.
+- Instancied rendering au coeur du rendu
+    + Pouvoir faire facilement de l'instancied rendering sans se prendre la tete (l'automatiser en quelque sorte)
+- Etroite relation entre shaders et materials. Pour permettre une automatisation et des gains de performance.
+    + Meme nommage pour les uniforms.
+    + Mise en cache des appels aux binding.
+- Relation etroite entre culling, occlusion et render pass
+    +   Tout les cas de figures doivent etre pris en compte (culling de frustum, de spot, de pointlight, des whatever)
+- Paralellisation de la preparation du rendu au maximum et performances optimales.
+    +   La preparation du rendu et les appels a BGFX ne doivent pas depasser 2ms pour une scene tres relativement complexe (1000 objets, dont certain instantiables, 2 points lights, 2 spotlights, une directionnal, occlusion culling, un objet skinné)
+    +   Pas de sync entre les thread (lock free au maximum)
+    +   Pas d'allocation. Utilisation de containers pre-alloués
+
+### Les pass
+
+Que fait une pass ? Elle a en inputs des informations, ex :
+- Une liste de spotlight avec une liste de mesh qui entrent dans chacun des frustums
+- Une liste de pointlight avec une liste de mesh qui entrent dans chacun de leur bounding sphere
+- Une liste de material avec pour chaque material une liste de mesh
+- Une liste de material avec pour chaque material, un mesh et une liste de transformations pour faire de l'instancied
+- ...
+
+A partir de ces inputs, une pass output des commandes de rendu (via BGFX)
+
+On le voit bien, ces inputs sont de sortes differentes : liste, listes de listes, listes de listes de listes etc
+Une pass peu aussi aussi prendre d'autres inputs, comme par exemple des informations de camera ou autre.
+Ces inputs vont donc entretenir une relation tres etroite avec la preparation du rendu, qui lui outputera ces listes.
+Ca sera donc les pass qui commanderont le comportement de la preparation du rendu.
+
+Je propose que les pass n'ai que peu de choix quand a leur reclamations d'inputs :
+- Liste des spotlights
+    + Avec liste des mesh dedans
+    + Ou sans
+- Liste des pointlights
+    + Avec liste des mesh dedans
+    + Ou sans
+- Liste des meshs dans un frustum
+
+Le filtrage et la preparation des ces listes se fait ensuite en interne dans les pass.
+
+.... a quoi que ....
+
+En fait on pourrait diviser l'archi selon cette grossiere idee :
+- A) On a les BFC manager, chacun contiennent un type de BFC (camera, meshs, spotlights, pointlights, whatever). Ces elements contenus sont de type :
+    + Cullable
+    + et / ou
+    + Able to cull :)
+- B) On a le Cull manager qui prend des commandes. Le but est de ne pas faire deux fois le meme culling pour rien et de reutiliser les resultats des memes commandes. Du genre, je veux :
+    + Cull Camera3D VS Nothing (donc toute les cameras)
+        * For each Camera3D cull Pointlight
+            - For each PointLight cull Meshs
+            - For each PointLigh cull Billboards
+    + Cull Camera3D VS Nothing
+        * For each Camera3D cull Meshs
+    + Cull Camera3D VS Nothing
+        * For each Camera3D cull Meshs (Res A)
+        * For each Camera3D cull Spotlights
+            - For each Spotlights cull from Res A
+- (Notes concernant le point B : Ca pu le truc hyper compliqué a developper, autre approche proposée ci dessous)
+- B) deuxieme approche) On a le cull manager qui prend des commandes de culling :
+    + Meshs dans camera
+    + Meshs dans spotlight
+    + Spotlight dans camera
+    + ................................ nan ca marche pas ...
+- C) On a les sort manager qui prennent le resultat des cull manager et les sort en fonction des exigences des pass, du genre :
+    + Groupe moi les mesh par material
+    + Groupe moi les mesh par instance de mesh par material
+    + File moi juste les mesh avec leur material
+
+... rien de tout ca n'est implementable tel quel a reflechir demain
+
