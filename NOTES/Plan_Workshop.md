@@ -79,3 +79,41 @@ Je souhaiterais limiter le nombre de participant a 20 personnes (peut-etre que j
 - Bref présentation du workshop 2. Bien leur expliquer qu'il sera plus drole que le 1 (j'espere), on etait obligé de passer par la pour s'amuser pendant les suivants.
 - Leur demander de m'envoyer un mail avec ce qu'ils ont pensé du workshop : si c'est de la merde ou pas ; si ils souhaiteraient aborder des points particulier a l'avenir ; ce que l'on pourrait faire pour ameliorer certains points.
 
+----------
+
+#### Workshop2
+
+- Bref resume de la semaine derniere.
+- Presentation du W2
+    + objectif : a la lumiere de ce que l'on a vu la semaine derniere, nous allons reflechir a differentes architectures d'engine possibles pour un jeu donné.
+- Presentation du jeu :
+    + Nous voulons faire un _binding of Isaac_ like :
+        * Generation aleatoire des enemis (proprietes gameplay, graphiques)
+        * Multiple combinaisons d'armes
+        * Serialization simple (on sauvegarde les states des differentes pieces du donjon traversées - ennemis, cadavre, coffres, ... - pour pouvoir les unloader / reloader.
+- Proposition _Object oriented_
+    + Quelques exemple de classes possibles
+    + Comment on organise les game objects dans l'archi
+    + En quoi c'est une bonne archi ?
+        * Les virtual `Update()` c'est quand meme bien pratique
+    + En quoi c'est une mauvaise archi ?
+        * Multiple inheritance
+        * Diamond inheritance
+        * Virtual a gogo
+        * Evolution du code -> si on veut ajouter des fonctionnalités par exemple
+        * Cache miss friendly
+- Data oriented + object oriented
+    + Description et exemple de classes possibles (Unity like -> les components sont des objects, avec des methodes virtuelles ex : `draw`, `update` ...)
+    + On remet l'entity component dans sont contexte (petite histoire : cowboy programming, les boites ou j'ai vu ca etc etc)
+- Petite pause technique, je donne une serie de ressource sur le sujet de l'entity components + quelques anecdotes perso / pro + des libs en proposant differentes implementations.
+J'en profite pour faire un rappel : il n'y a pas d'architecture entity component silver bullet qui gere parfaitement tout les type de jeu avec des perfs optimal. Chaque jeu merite sa propre implementation un peu specialisée tout de meme - c'est un mon sens un fantasme naif de croire qu'il existe une solution miracle.
+- On retourne a nos differentes archi possible. On attaque le data oriented que j'appelle de maniere tres imparfaite : _entity component system_ (revoir dans GEA l'appelation par le gars de Naugthy)
+    + Description et exemple d'entity et de components sous la forme de POD
+    + Comment on organise tout ca dans l'archi. Presentation des systems
+- Database
+    + Petit point sur l'organisation en database (pas forcement le plus adapté a un Binding of Isaac, mais on peut parler d'autre type de jeu)
+- (Si on a le temps)
+    + On fait tous ensemble une serie de tests que j'ai pu avoir en entretien (Ubi, Eko, Cyanide). Sans se juger, pour rigoler et se faire une idee d'a quoi s'attendre.
+
+
+
