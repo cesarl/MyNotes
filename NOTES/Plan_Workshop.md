@@ -1,6 +1,6 @@
 ## Game engine workshop | Reflexion generale
 
-Tentative de definition des workshops que j'aimerais donner a Epimerde
+Tentative de definition des workshops que j'aimerais donner a Epitech
 
 #### Titre
 
@@ -120,6 +120,28 @@ J'en profite pour faire un rappel : il n'y a pas d'architecture entity component
     + Petit point sur l'organisation en database (pas forcement le plus adapté a un Binding of Isaac, mais on peut parler d'autre type de jeu)
 - (Si on a le temps)
     + On fait tous ensemble une serie de tests que j'ai pu avoir en entretien (Ubi, Eko, Cyanide). Sans se juger, pour rigoler et se faire une idee d'a quoi s'attendre.
+
+--------------
+
+Workshop suivant, idees de theme a aborder :
+
+- Resoudre des problemes, iterer, profiler, shipper ! Duck tape programming, on est des artisants, pas des artistes. Virer de son crane le bullshit cultivé en ecole sur la beauté du code, le but c'est pas que le code soit beau, c'est de shipper.
+- Le peer review. Comment ca marchait a Ubi. Ses interets, mais aussi ses desavantages (ex : syndrome du petit lieutenant).
+- Le rendu, comment ca marche dans un jeu. Comment on fait une architecture pour rendre notre jeu. Tres vaste sujet a affiner.
+    + On pourrait par exemple decortiquer le rendu d'une frame
+- Le culling (frustum, occlusion). Quelles approches existent (stupid bruteforce, quad, octree, smart bruteforce) leurs bon et mauvais cote. Parlons des approches en : monde ouvert, interieurs (portals, antiportal etc). Plein de truc a dire, apres faut pas endormir les gens.
+- Les assets et leur pipeline : de la raw data, en passant par le cooker jusqu'au GPU
+- Le threading :
+    + Differentes archi (pipeline, job, fiber)
+    + Le probleme du thread de rendu. Ne pas confondre CPU hang et GPU hang. Bien comprendre la relation entre le deux.
+    + Lock free programming. C'est quoi ? L'interet ? Exemple de data structure (LFList, LFVector, etc etc)
+    + Petit point sur les command buffer GPU. Le turfu avec DX12 et Vulkan. Ce que l'on peut deja faire sur XbOne/PS4 avec le compute command buffer.
+- La memoire :
+    + Les allocateurs, les pools, les buffers
+    + Tracker les allocations
+- Les metiers du jeu AAA. Developper sur les autres metier que l'engine dans le JV AAA. Voir quelle est la "meilleure" formation pour atteindre ses objectifs. "Si comme moi t'es pas tres malin, specialise toi et arrete de t'eparpiller".
+- Briques existantes pour entammer la construction d'un GE sans recoder le monde entier (ImGui, Cereal, BGFX, Assimp, SoLoud, etc etc)
+- Les outils de debug graphique (CodeXL, Nsight)
 
 
 
