@@ -2,6 +2,12 @@
 
 Tentative de definition des workshops que j'aimerais donner a Epimerde
 
+#### Titre
+
+Si on devait lui donner un titre, je dirais :
+"Introduction technique et professionnelle au developpement de moteur de jeux"
+(l'idee etant de dire, on va parler technique et un peu de ma maigre et humble experience professionnelle de stagiaire la dedans).
+
 #### Objectifs
 
 - Objectif principal : introduction technique au travail sur moteur :
