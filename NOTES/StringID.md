@@ -32,3 +32,9 @@ L'utilitaire (.exe) :
 - Compilation avec Fasbuild (generation de projets + compilation distribuée)
 - Profiler intégré pour mesurer les performances
 - Search and hash : possibilité de definir un regex a chercher dans certains types de fichier et a hasher (in place ou dans database) - pas sur encore de son utilité
+
+Tests :
+
+- Pas mal de tests unitaires et de performance au menu :
+- Erreur de syntax
+- Tres grand nombre de fichier a parser / hasher
